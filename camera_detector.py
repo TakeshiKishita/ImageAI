@@ -2,10 +2,15 @@ import sys
 import cv2
 
 from multiprocessing import Process, Queue
+from imageai.Detection import ObjectDetection
 
 
 class CameraDetector:
     def __init__(self):
+        self.detector = ObjectDetection()
+        self.detector.setModelTypeAsTinyYOLOv3()
+        self.detector.setModelPath('model/yolo-tiny.h5')
+        self.detector.loadModel()
 
         # オブジェクト初期化
         self.cap = cv2.VideoCapture(
@@ -14,19 +19,25 @@ class CameraDetector:
         # マルチプロセスで、フレームを取得し続ける。
         self.p = Process(target=get_frame, args=(self.cap,))
         self.p.start()
-        pass
 
     def run(self):
         """
         カメラから取得した映像に対して、推論を行う
         """
+        global queue
 
         while True:
             try:
                 # キューを取得（この処理後にキューが空になる）
-                frame = queue.get()
+                bgr_img = queue.get()
+                # ImageAIはRGBで読み込む必要があるため、BGRからRGBへ変換する。
+                rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
 
-                cv2.imshow('frame', frame)
+                detections = self.detector.detectObjectsFromImage(input_image=rgb_img, input_type='array',
+                                                                  output_type='array',
+                                                                  minimum_percentage_probability=30)
+
+                cv2.imshow('frame', detections[0])
                 cv2.waitKey(1)
 
             # キーボードの「Ctrl-C」が押された場合、以下の終了処理を行う
@@ -51,6 +62,7 @@ def get_frame(cap):
     Returns:
 
     """
+    global queue
     while True:
         # フレームを取得する
         _, frame = cap.read()
