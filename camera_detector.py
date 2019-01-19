@@ -7,12 +7,13 @@ from imageai.Detection import ObjectDetection
 
 class CameraDetector:
     def __init__(self):
+        # ImageAIインスタンスの初期化
         self.detector = ObjectDetection()
         self.detector.setModelTypeAsTinyYOLOv3()
         self.detector.setModelPath('model/yolo-tiny.h5')
         self.detector.loadModel()
 
-        # オブジェクト初期化
+        # openCVインスタンスの初期化
         self.cap = cv2.VideoCapture(
             'http://210.254.207.10:80/-wvhttp-01-/GetOneShot?image_size=640x480&frame_count=1000000000')
 
@@ -46,10 +47,12 @@ class CameraDetector:
 
             # キーボードの「Ctrl-C」が押された場合、以下の終了処理を行う
             except (KeyboardInterrupt, ValueError):
-                self.cap.release()
                 cv2.destroyAllWindows()
+                self.cap.release()
+                self.queue.close()
                 self.p.terminate()
-                sys.exit()
+                print('Bye')
+                sys.exit(0)
 
 
 def get_frame(cap, queue):
@@ -59,7 +62,6 @@ def get_frame(cap, queue):
     Args:
         cap:VideoCaptureオブジェクト
         queue:キュー
-
     """
     while True:
         # フレームを取得する
