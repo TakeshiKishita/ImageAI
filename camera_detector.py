@@ -35,11 +35,13 @@ class CameraDetector:
                 # ImageAIはRGBで読み込む必要があるため、BGRからRGBへ変換する。
                 rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
 
+                # ImageAIを使用して推論を行う。
                 detections = self.detector.detectObjectsFromImage(input_image=rgb_img, input_type='array',
                                                                   output_type='array',
                                                                   minimum_percentage_probability=30)
 
-                cv2.imshow('frame', detections[0])
+                # 推論結果をディスプレイに表示する。
+                cv2.imshow('screen', cv2.cvtColor(detections[0], cv2.COLOR_RGB2BGR))
                 cv2.waitKey(1)
 
             # キーボードの「Ctrl-C」が押された場合、以下の終了処理を行う
@@ -55,9 +57,8 @@ def get_frame(cap, queue):
     フレームを取得し、キューが空の場合、
     フレームをキューに入れ続ける。
     Args:
-        cap:
-
-    Returns:
+        cap:VideoCaptureオブジェクト
+        queue:キュー
 
     """
     while True:
