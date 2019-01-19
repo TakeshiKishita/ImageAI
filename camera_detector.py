@@ -45,7 +45,7 @@ class CameraDetector:
                 cv2.waitKey(1)
 
             # キーボードの「Ctrl-C」が押された場合、以下の終了処理を行う
-            except KeyboardInterrupt:
+            except (KeyboardInterrupt, ValueError):
                 self.cap.release()
                 cv2.destroyAllWindows()
                 self.p.terminate()
