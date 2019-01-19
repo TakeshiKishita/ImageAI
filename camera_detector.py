@@ -16,20 +16,22 @@ class CameraDetector:
         self.cap = cv2.VideoCapture(
             'http://210.254.207.10:80/-wvhttp-01-/GetOneShot?image_size=640x480&frame_count=1000000000')
 
+        # キューの作成
+        self.queue = Queue()
+
         # マルチプロセスで、フレームを取得し続ける。
-        self.p = Process(target=get_frame, args=(self.cap,))
+        self.p = Process(target=get_frame, args=(self.cap, self.queue))
         self.p.start()
 
     def run(self):
         """
         カメラから取得した映像に対して、推論を行う
         """
-        global queue
 
         while True:
             try:
                 # キューを取得（この処理後にキューが空になる）
-                bgr_img = queue.get()
+                bgr_img = self.queue.get()
                 # ImageAIはRGBで読み込む必要があるため、BGRからRGBへ変換する。
                 rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
 
@@ -48,11 +50,7 @@ class CameraDetector:
                 sys.exit()
 
 
-# キューの作成
-queue = Queue()
-
-
-def get_frame(cap):
+def get_frame(cap, queue):
     """
     フレームを取得し、キューが空の場合、
     フレームをキューに入れ続ける。
@@ -62,7 +60,6 @@ def get_frame(cap):
     Returns:
 
     """
-    global queue
     while True:
         # フレームを取得する
         _, frame = cap.read()
