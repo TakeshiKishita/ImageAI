@@ -11,14 +11,14 @@ class CameraDetector:
         self.detector = ObjectDetection()
         self.detector.setModelTypeAsTinyYOLOv3()
         self.detector.setModelPath('model/yolo-tiny.h5')
-        self.detector.loadModel()
+        self.detector.loadModel(detection_speed='faster')  # オプションによって制度と速度が変化する
 
         # openCVインスタンスの初期化
-        self.cap = cv2.VideoCapture(
-            'http://210.254.207.10:80/-wvhttp-01-/GetOneShot?image_size=640x480&frame_count=1000000000')
+        src = 'http://210.254.207.10:80/-wvhttp-01-/GetOneShot?image_size=640x480&frame_count=1000000000'
+        self.cap = cv2.VideoCapture(src)
 
         # キューの作成
-        self.queue = Queue()
+        self.queue = Queue(maxsize=1)
 
         # マルチプロセスで、フレームを取得し続ける。
         self.p = Process(target=get_frame, args=(self.cap, self.queue))
